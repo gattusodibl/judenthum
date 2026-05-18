@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Judentum Quiz – Religionskunde KSM</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --t1: #1F4E79; --t1l: #D6E4F7; --t1m: #4A7FAB;
+    --t2: #2D6A2D; --t2l: #D4EDD4; --t2m: #5A9A5A;
+    --t3: #7B2020; --t3l: #F5D5D5; --t3m: #B05050;
+    --t4: #3E1F7A; --t4l: #E0D5F7; --t4m: #7A55B0;
+    --bg: #F7F4EF;
+    --card: #FFFFFF;
+    --text: #1A1A1A;
+    --sub: #666666;
+    --radius: 14px;
+    --shadow: 0 4px 24px rgba(0,0,0,0.08);
+    --shadow-lg: 0 8px 40px rgba(0,0,0,0.14);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    background-image: radial-gradient(circle at 20% 20%, #E8F0FA 0%, transparent 50%),
+                      radial-gradient(circle at 80% 80%, #EDE8F5 0%, transparent 50%);
+  }
+
+  /* ── NAV ── */
+  .topbar {
+    background: #fff;
+    border-bottom: 1px solid #E8E4DE;
+    padding: 0 2rem;
+    display: flex; align-items: center; justify-content: space-between;
+    height: 60px; position: sticky; top: 0; z-index: 100;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  }
+  .topbar-title { font-family: 'Playfair Display', serif; font-size: 1.1rem; color: var(--t1); }
+  .topbar-sub { font-size: 0.78rem; color: var(--sub); }
+  .progress-wrap { flex: 1; max-width: 260px; margin: 0 2rem; }
+  .progress-bar { height: 5px; background: #E8E4DE; border-radius: 99px; overflow: hidden; }
+  .progress-fill { height: 100%; border-radius: 99px; transition: width 0.5s ease; background: var(--active-color, #1F4E79); }
+  .progress-label { font-size: 0.72rem; color: var(--sub); margin-top: 4px; text-align: right; }
+
+  /* ── SCREENS ── */
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  /* ── HOME ── */
+  .home { max-width: 760px; margin: 0 auto; padding: 3rem 1.5rem; }
+  .home-hero { text-align: center; margin-bottom: 3rem; }
+  .star-of-david { font-size: 3.5rem; margin-bottom: 1rem; display: block; animation: floatY 4s ease-in-out infinite; }
+  @keyframes floatY { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+  .home-title { font-family: 'Playfair Display', serif; font-size: 2.8rem; font-weight: 900; line-height: 1.1; color: var(--t1); }
+  .home-subtitle { font-size: 1.05rem; color: var(--sub); margin-top: 0.6rem; }
+
+  .topic-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 2rem; }
+  @media(max-width:520px){ .topic-grid { grid-template-columns: 1fr; } }
+  .topic-card {
+    background: var(--card); border-radius: var(--radius); padding: 1.4rem 1.6rem;
+    cursor: pointer; border: 2px solid transparent; transition: all 0.2s;
+    box-shadow: var(--shadow); position: relative; overflow: hidden;
+  }
+  .topic-card::before {
+    content: ''; position: absolute; top: 0; left: 0; width: 5px; height: 100%;
+    background: var(--tc);
+  }
+  .topic-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); border-color: var(--tc); }
+  .topic-card.selected { border-color: var(--tc); background: color-mix(in srgb, var(--tc) 5%, white); }
+  .topic-card .tc-num { font-size: 0.72rem; font-weight: 600; color: var(--tc); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.3rem; }
+  .topic-card .tc-title { font-family: 'Playfair Display', serif; font-size: 1.05rem; font-weight: 700; color: var(--text); }
+  .topic-card .tc-count { font-size: 0.78rem; color: var(--sub); margin-top: 0.4rem; }
+  .topic-card .tc-check { position: absolute; top: 1rem; right: 1rem; width: 22px; height: 22px; border-radius: 50%; background: var(--tc); display: none; align-items: center; justify-content: center; color: #fff; font-size: 12px; }
+  .topic-card.selected .tc-check { display: flex; }
+
+  .all-btn {
+    display: block; width: 100%; padding: 1rem;
+    background: var(--t1); color: #fff; border: none; border-radius: var(--radius);
+    font-family: 'DM Sans', sans-serif; font-size: 1rem; font-weight: 600;
+    cursor: pointer; transition: all 0.2s; margin-bottom: 0.8rem;
+    box-shadow: 0 4px 16px rgba(31,78,121,0.3);
+  }
+  .all-btn:hover { background: #163A5C; transform: translateY(-1px); }
+  .start-btn {
+    display: block; width: 100%; padding: 1rem;
+    background: #fff; color: var(--t1); border: 2px solid var(--t1);
+    border-radius: var(--radius); font-family: 'DM Sans', sans-serif;
+    font-size: 1rem; font-weight: 600; cursor: pointer; transition: all 0.2s;
+  }
+  .start-btn:hover { background: var(--t1); color: #fff; }
+  .start-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .joker-info { display: flex; gap: 0.6rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+  .joker-pill { padding: 5px 12px; border-radius: 99px; font-size: 0.78rem; font-weight: 500; background: #fff; border: 1px solid #DDD; color: var(--sub); }
+
+  /* ── QUIZ ── */
+  .quiz-wrap { max-width: 720px; margin: 0 auto; padding: 2rem 1.5rem; }
+
+  .q-meta { display: flex; align-items: center; gap: 0.8rem; margin-bottom: 1rem; }
+  .q-badge { font-size: 0.72rem; font-weight: 600; padding: 3px 10px; border-radius: 99px; color: #fff; background: var(--active-color, #1F4E79); }
+  .q-type-badge { font-size: 0.72rem; padding: 3px 10px; border-radius: 99px; background: #F0EDE8; color: var(--sub); font-weight: 500; }
+  .q-num { font-size: 0.78rem; color: var(--sub); margin-left: auto; }
+
+  .q-card {
+    background: var(--card); border-radius: var(--radius);
+    box-shadow: var(--shadow); padding: 2rem;
+    border-top: 4px solid var(--active-color, #1F4E79);
+    animation: slideIn 0.3s ease;
+  }
+  @keyframes slideIn { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+  .q-text { font-size: 1.15rem; font-weight: 500; line-height: 1.55; margin-bottom: 1.5rem; }
+
+  /* MC options */
+  .opts { display: flex; flex-direction: column; gap: 0.6rem; }
+  .opt-btn {
+    display: flex; align-items: center; gap: 0.9rem;
+    background: #F7F4EF; border: 1.5px solid #E8E4DE; border-radius: 10px;
+    padding: 0.85rem 1.1rem; cursor: pointer; font-family: 'DM Sans', sans-serif;
+    font-size: 0.97rem; text-align: left; color: var(--text);
+    transition: all 0.15s;
+  }
+  .opt-btn:hover:not(:disabled) { background: #EEE9E0; border-color: #CCC; transform: translateX(3px); }
+  .opt-letter { min-width: 28px; height: 28px; border-radius: 50%; background: #fff; border: 1.5px solid #DDD; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 600; color: var(--sub); flex-shrink: 0; }
+  .opt-btn.correct { background: #D4EDD4; border-color: #2D6A2D; }
+  .opt-btn.correct .opt-letter { background: #2D6A2D; color: #fff; border-color: #2D6A2D; }
+  .opt-btn.wrong { background: #F5D5D5; border-color: #7B2020; }
+  .opt-btn.wrong .opt-letter { background: #7B2020; color: #fff; border-color: #7B2020; }
+  .opt-btn.reveal { background: #D4EDD4; border-color: #2D6A2D; opacity: 0.6; }
+  .opt-btn.reveal .opt-letter { background: #2D6A2D; color: #fff; border-color: #2D6A2D; }
+  .opt-btn:disabled { cursor: default; }
+
+  /* TF options */
+  .tf-opts { display: flex; gap: 0.8rem; }
+  .tf-btn {
+    flex: 1; padding: 1rem; border-radius: 10px; font-family: 'DM Sans', sans-serif;
+    font-size: 1rem; font-weight: 600; cursor: pointer; border: 2px solid #E8E4DE;
+    background: #F7F4EF; transition: all 0.15s;
+  }
+  .tf-btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+  .tf-btn.richtig { border-color: #2D6A2D; color: #2D6A2D; }
+  .tf-btn.falsch { border-color: #7B2020; color: #7B2020; }
+  .tf-btn.correct { background: #D4EDD4; border-color: #2D6A2D; color: #2D6A2D; }
+  .tf-btn.wrong { background: #F5D5D5; border-color: #7B2020; color: #7B2020; }
+  .tf-btn:disabled { cursor: default; }
+
+  /* Match */
+  .match-wrap { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  @media(max-width:520px){ .match-wrap { grid-template-columns: 1fr; } }
+  .match-col-title { font-size: 0.75rem; font-weight: 600; color: var(--sub); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.5rem; }
+  .match-left { display: flex; flex-direction: column; gap: 0.5rem; }
+  .match-item { background: #F7F4EF; border: 1.5px solid #E8E4DE; border-radius: 8px; padding: 0.7rem 1rem; font-size: 0.92rem; display: flex; align-items: center; gap: 0.6rem; }
+  .match-num { min-width: 24px; height: 24px; border-radius: 50%; background: var(--active-color,#1F4E79); color: #fff; font-size: 0.72rem; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .match-right { display: flex; flex-direction: column; gap: 0.5rem; }
+  .match-opt {
+    background: #fff; border: 1.5px solid #DDD; border-radius: 8px;
+    padding: 0.7rem 1rem; font-size: 0.9rem; cursor: pointer;
+    transition: all 0.15s; display: flex; align-items: center; gap: 0.6rem;
+  }
+  .match-opt:hover:not(:disabled):not(.selected) { border-color: var(--active-color,#1F4E79); background: #F0EDE8; }
+  .match-opt.selected { border-color: var(--active-color,#1F4E79); background: color-mix(in srgb, var(--active-color,#1F4E79) 8%, white); }
+  .match-opt.correct { background: #D4EDD4; border-color: #2D6A2D; }
+  .match-opt.wrong { background: #F5D5D5; border-color: #7B2020; }
+  .match-opt:disabled { cursor: default; }
+  .match-letter { min-width: 24px; height: 24px; border-radius: 50%; background: #E8E4DE; display: flex; align-items: center; justify-content: center; font-size: 0.72rem; font-weight: 700; flex-shrink: 0; }
+  .match-opt.selected .match-letter { background: var(--active-color,#1F4E79); color: #fff; }
+  .match-opt.correct .match-letter { background: #2D6A2D; color: #fff; }
+  .match-opt.wrong .match-letter { background: #7B2020; color: #fff; }
+  .match-instr { font-size: 0.83rem; color: var(--sub); margin-bottom: 1rem; font-style: italic; }
+
+  /* Feedback */
+  .feedback {
+    margin-top: 1.2rem; padding: 1rem 1.2rem; border-radius: 10px;
+    font-size: 0.92rem; line-height: 1.55; display: none;
+  }
+  .feedback.ok { background: #D4EDD4; color: #1C461C; border: 1px solid #2D6A2D; }
+  .feedback.ko { background: #F5D5D5; color: #5A1010; border: 1px solid #7B2020; }
+
+  /* Jokers */
+  .joker-bar { display: flex; gap: 0.5rem; margin-bottom: 1.2rem; flex-wrap: wrap; }
+  .j-btn {
+    padding: 5px 14px; border-radius: 99px; font-size: 0.8rem; font-weight: 600;
+    border: 1.5px solid #DDD; background: #fff; cursor: pointer; transition: all 0.15s;
+    color: var(--text);
+  }
+  .j-btn:hover:not(:disabled) { border-color: var(--active-color,#1F4E79); color: var(--active-color,#1F4E79); }
+  .j-btn:disabled { opacity: 0.28; cursor: not-allowed; }
+
+  .next-btn {
+    margin-top: 1.2rem; padding: 0.8rem 2rem; border-radius: 10px;
+    background: var(--active-color, #1F4E79); color: #fff; border: none;
+    font-family: 'DM Sans', sans-serif; font-size: 0.97rem; font-weight: 600;
+    cursor: pointer; transition: all 0.2s; display: none;
+  }
+  .next-btn:hover { filter: brightness(1.12); transform: translateY(-1px); }
+
+  /* ── RESULT ── */
+  .result-wrap { max-width: 600px; margin: 0 auto; padding: 3rem 1.5rem; text-align: center; }
+  .result-emoji { font-size: 3.5rem; display: block; margin-bottom: 1rem; animation: pop 0.5s ease; }
+  @keyframes pop { 0%{transform:scale(0)} 70%{transform:scale(1.2)} 100%{transform:scale(1)} }
+  .result-pct { font-family: 'Playfair Display', serif; font-size: 4.5rem; font-weight: 900; line-height: 1; }
+  .result-label { font-size: 1.1rem; color: var(--sub); margin-top: 0.4rem; margin-bottom: 2rem; }
+  .result-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 0.8rem; margin-bottom: 2rem; }
+  .r-card { background: #fff; border-radius: var(--radius); padding: 1rem; box-shadow: var(--shadow); }
+  .r-card .rv { font-family: 'Playfair Display', serif; font-size: 1.8rem; font-weight: 700; }
+  .r-card .rl { font-size: 0.75rem; color: var(--sub); margin-top: 3px; }
+  .topic-scores { background: #fff; border-radius: var(--radius); padding: 1.4rem; box-shadow: var(--shadow); margin-bottom: 1.5rem; text-align: left; }
+  .ts-title { font-size: 0.78rem; font-weight: 600; color: var(--sub); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 0.8rem; }
+  .ts-row { display: flex; align-items: center; gap: 0.8rem; margin-bottom: 0.6rem; }
+  .ts-name { font-size: 0.85rem; min-width: 130px; }
+  .ts-bar-wrap { flex: 1; height: 7px; background: #F0EDE8; border-radius: 99px; overflow: hidden; }
+  .ts-bar { height: 100%; border-radius: 99px; transition: width 1s ease; }
+  .ts-pct { font-size: 0.8rem; font-weight: 600; min-width: 36px; text-align: right; }
+  .replay-btn {
+    display: inline-block; padding: 0.9rem 2.5rem; border-radius: var(--radius);
+    background: var(--t1); color: #fff; border: none; font-family: 'DM Sans', sans-serif;
+    font-size: 1rem; font-weight: 600; cursor: pointer; transition: all 0.2s;
+    box-shadow: 0 4px 16px rgba(31,78,121,0.25); margin-right: 0.6rem;
+  }
+  .replay-btn:hover { background: #163A5C; transform: translateY(-1px); }
+  .home-btn {
+    display: inline-block; padding: 0.9rem 2.5rem; border-radius: var(--radius);
+    background: #fff; color: var(--t1); border: 2px solid var(--t1);
+    font-family: 'DM Sans', sans-serif; font-size: 1rem; font-weight: 600;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .home-btn:hover { background: var(--t1); color: #fff; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div>
+    <div class="topbar-title">✡ Judentum Quiz</div>
+    <div class="topbar-sub">Religionskunde KSM</div>
+  </div>
+  <div class="progress-wrap" id="topProgress" style="display:none">
+    <div class="progress-bar"><div class="progress-fill" id="topFill"></div></div>
+    <div class="progress-label" id="topLabel"></div>
+  </div>
+  <div id="jokerBar" class="joker-bar" style="margin:0;display:none;">
+    <button class="j-btn" id="jFifty" onclick="useJoker('fifty')">50 / 50</button>
+    <button class="j-btn" id="jTipp" onclick="useJoker('tipp')">Tipp</button>
+    <button class="j-btn" id="jSkip" onclick="useJoker('skip')">Überspringen</button>
+  </div>
+</div>
+
+<!-- HOME -->
+<div id="homeScreen" class="screen active">
+  <div class="home">
+    <div class="home-hero">
+      <span class="star-of-david">✡</span>
+      <h1 class="home-title">Judentum Quiz</h1>
+      <p class="home-subtitle">Alle Themen der Prüfung — Multiple Choice, Richtig/Falsch & Zuordnung</p>
+    </div>
+
+    <div class="joker-info">
+      <span class="joker-pill">🎯 50/50 – zwei falsche Antworten ausblenden</span>
+      <span class="joker-pill">💡 Tipp – Hinweis anzeigen</span>
+      <span class="joker-pill">⏭ Überspringen – Frage weiter</span>
+    </div>
+
+    <div class="topic-grid">
+      <div class="topic-card" style="--tc:var(--t1)" data-t="1" onclick="toggleTopic(1)">
+        <div class="tc-num">Thema 1</div>
+        <div class="tc-title">Mose & Pessach</div>
+        <div class="tc-count">15 Fragen</div>
+        <div class="tc-check">✓</div>
+      </div>
+      <div class="topic-card" style="--tc:var(--t2)" data-t="2" onclick="toggleTopic(2)">
+        <div class="tc-num">Thema 2</div>
+        <div class="tc-title">Jüdisch-Sein & Symbole</div>
+        <div class="tc-count">15 Fragen</div>
+        <div class="tc-check">✓</div>
+      </div>
+      <div class="topic-card" style="--tc:var(--t3)" data-t="3" onclick="toggleTopic(3)">
+        <div class="tc-num">Thema 3</div>
+        <div class="tc-title">Tanach & Talmud</div>
+        <div class="tc-count">12 Fragen</div>
+        <div class="tc-check">✓</div>
+      </div>
+      <div class="topic-card" style="--tc:var(--t4)" data-t="4" onclick="toggleTopic(4)">
+        <div class="tc-num">Thema 4</div>
+        <div class="tc-title">Religiöse Praxis</div>
+        <div class="tc-count">18 Fragen</div>
+        <div class="tc-check">✓</div>
+      </div>
+    </div>
+
+    <button class="all-btn" onclick="selectAll()">Alle Themen auswählen & starten</button>
+    <button class="start-btn" id="startSelBtn" onclick="startSelected()" disabled>Nur ausgewählte Themen starten</button>
+  </div>
+</div>
+
+<!-- QUIZ -->
+<div id="quizScreen" class="screen">
+  <div class="quiz-wrap">
+    <div class="q-meta">
+      <span class="q-badge" id="qBadge"></span>
+      <span class="q-type-badge" id="qTypeBadge"></span>
+      <span class="q-num" id="qNum"></span>
+    </div>
+    <div class="q-card" id="qCard">
+      <div class="q-text" id="qText"></div>
+      <div id="qBody"></div>
+      <div class="feedback" id="qFeedback"></div>
+      <button class="next-btn" id="nextBtn" onclick="nextQ()">Weiter →</button>
+    </div>
+  </div>
+</div>
+
+<!-- RESULT -->
+<div id="resultScreen" class="screen">
+  <div class="result-wrap">
+    <span class="result-emoji" id="rEmoji"></span>
+    <div class="result-pct" id="rPct"></div>
+    <div class="result-label" id="rLabel"></div>
+    <div class="result-grid">
+      <div class="r-card"><div class="rv" id="rRight" style="color:#2D6A2D"></div><div class="rl">Richtig</div></div>
+      <div class="r-card"><div class="rv" id="rWrong" style="color:#7B2020"></div><div class="rl">Falsch</div></div>
+      <div class="r-card"><div class="rv" id="rStreak"></div><div class="rl">Beste Serie</div></div>
+    </div>
+    <div class="topic-scores" id="topicScores"></div>
+    <button class="replay-btn" onclick="replay()">Nochmal spielen</button>
+    <button class="home-btn" onclick="goHome()">Zurück</button>
+  </div>
+</div>
+
+<script>
+const TOPIC_COLORS = { 1:'#1F4E79', 2:'#2D6A2D', 3:'#7B2020', 4:'#3E1F7A' };
+const TOPIC_NAMES = { 1:'Mose & Pessach', 2:'Jüdisch-Sein & Symbole', 3:'Tanach & Talmud', 4:'Religiöse Praxis' };
+
+// ── QUESTION BANK ──────────────────────────────────────────────────────────
+// Types: mc=multiple choice, tf=true/false, match=matching
+const BANK = [
+
+  // ══ THEMA 1: Mose & Pessach ══
+  {t:1,type:'mc',q:"Warum wurden die Israeliten in Ägypten zu Sklaven gemacht?",o:["Sie hatten keine eigene Sprache","Ein neuer Pharao kam an die Macht und fürchtete ihre wachsende Zahl","Sie hatten Schulden beim Pharao","Moses bat den Pharao darum"],a:1,h:"Ein neuer Pharao sah die Israeliten als Bedrohung und liess sie versklaven."},
+  {t:1,type:'mc',q:"Wie rettete Moses' Familie ihn als Baby?",o:["Sie flohen nach Kanaan","Sie bestachen den Pharao","Sie setzten ihn in einem Körbchen auf dem Nil aus","Sie versteckten ihn im Tempel"],a:2,h:"Moses' Mutter legte ihn in ein Körbchen auf dem Nil – er wurde von der Tochter des Pharaos gefunden."},
+  {t:1,type:'mc',q:"In welchem Zeichen erschien Gott dem Moses zum ersten Mal?",o:["In einem Blitz","In einem brennenden Dornbusch","In einer Wolke","In einem Traum"],a:1,h:"Gott sprach zu Moses aus einem brennenden Dornbusch, der nicht verbrannte."},
+  {t:1,type:'mc',q:"Was bedeutet der Name «Pessach»?",o:["Befreiung","Opfer","Vorübergehen","Gebet"],a:2,h:"Pessach = «Vorübergehen» – Gott ging an den Häusern der Israeliten vorbei (zehnte Plage)."},
+  {t:1,type:'mc',q:"Was ist das «Tetragramm»?",o:["Der Name des Tempel","Der vierarmige Leuchter","Der Name Gottes aus vier Konsonanten (JHWH)","Die vier Bücher Moses"],a:2,h:"JHWH = vier hebräische Konsonanten (Jod, He, Waw, He). Tetra = vier (griech.)."},
+  {t:1,type:'mc',q:"Warum zerstörte Moses die ersten Steintafeln?",o:["Er stolperte beim Abstieg","Das Volk hatte ein goldenes Kalb angebetet","Gott befahl es ihm","Der Pharao hatte sie gestohlen"],a:1,h:"Als Moses vom Sinai kam und das Volk beim Götzendienst sah, zerbrach er die Tafeln aus Zorn."},
+  {t:1,type:'mc',q:"Was ist die «Haggada»?",o:["Ein Gebet im Tempel","Das Buch mit der Erzählung des Auszugs aus Ägypten, am Sederabend gelesen","Die Speiseordnung","Eine Art Chanukkia"],a:1,h:"Haggada = «Erzählung». Am Sederabend wird die Geschichte des Exodus vorgelesen."},
+  {t:1,type:'tf',q:"Moses war der Sohn des Pharaos und kannte die Sklaverei des israelitischen Volkes nicht.",a:false,h:"Moses war ein Hebräer, der am Hof aufwuchs. Er kannte seine Herkunft und sah das Leid seines Volkes."},
+  {t:1,type:'tf',q:"Das Pessachfest dauert acht Tage.",a:true,h:"Pessach ist ein achttägiges Fest. Im Mittelpunkt steht der Sederabend am ersten Abend."},
+  {t:1,type:'tf',q:"Das Salzwasser auf dem Sederteller symbolisiert die Lehmziegel, die Sklaven herstellen mussten.",a:false,h:"Das Salzwasser symbolisiert die vergossenen Tränen der Sklaven. Das Charoset erinnert an die Lehmziegel."},
+  {t:1,type:'tf',q:"Moses erhielt die Zehn Gebote ein zweites Mal, nachdem er die ersten Tafeln zerstört hatte.",a:true,h:"Gott gab Moses die Gebote erneut auf neuen Steintafeln nach dem goldenen-Kalb-Vorfall."},
+  {t:1,type:'mc',q:"Was symbolisieren die Mazzen am Sederabend?",o:["Das Brot des Lebens","Das ungesäuerte Brot – die Israeliten hatten keine Zeit den Teig zu säuern","Die Opferbrote im Tempel","Das erste Brot in Kanaan"],a:1,h:"Mazzen = ungesäuertes Brot. Die Israeliten mussten so schnell fliehen, dass der Teig nicht aufgehen konnte."},
+  {t:1,type:'mc',q:"Was ist der «Afikoman» beim Sederabend?",o:["Ein Gebet am Tischende","Ein Stück Mazze, das versteckt und von Kindern gesucht wird","Eine Suppe aus Mazzenmehl","Ein Lied am Ende des Abends"],a:1,h:"Der Afikoman ist ein verstecktes Stück Mazze. Kinder suchen es und erhalten ein Geschenk."},
+  {t:1,type:'mc',q:"Woran erinnert das Bitterkraut (Maror) auf dem Sederteller?",o:["An die Wüstenwanderung","An die bittere Zeit der Sklaverei in Ägypten","An den Tod des Pharaos","An die Opfer im Tempel"],a:1,h:"Bitterkraut = Bitterkeit der Sklaverei. Typisch: Chicoree, Endivie, Meerrettich."},
+  {t:1,type:'tf',q:"In der Haggada heisst es, jede Generation solle sich fühlen, als wäre sie selbst aus Ägypten ausgezogen.",a:true,h:"Deshalb wird Pessach nicht nur erzählt, sondern gefeiert – als persönliche Erfahrung jeder Generation."},
+
+  // ══ THEMA 2: Jüdisch-Sein & Symbole ══
+  {t:2,type:'mc',q:"Wer gilt nach orthodoxer Halacha als jüdisch?",o:["Wer an Gott glaubt","Wer in Israel lebt","Wer eine jüdische Mutter hat oder konvertiert ist","Wer die Tora studiert"],a:2,h:"Nach der Halacha (jüd. Religionsgesetz) bestimmt die Mutter die religiöse Zugehörigkeit."},
+  {t:2,type:'mc',q:"Was ist der Unterschied zwischen «Israeli» und «Israelit»?",o:["Es ist dasselbe Wort in verschiedenen Sprachen","Israeli = Staatsbürger Israels; Israelit = Angehöriger der biblischen 12 Stämme","Israeli ist ein modernes Wort für Jude","Israelit ist veraltet und wird nicht mehr benutzt"],a:1,h:"Israeli = Staatsangehörigkeit (jede Religion!). Israelit = religiöse/kulturelle Stammeszugehörigkeit."},
+  {t:2,type:'mc',q:"Was bedeutet «Schma Israel» übersetzt?",o:["Gott Israels segne uns","Höre, Israel!","Israel, komm zurück!","Bete, Israel!"],a:1,h:"Schma = «höre» (hebr.). Das Schma Israel ist das wichtigste Gebet/Glaubensbekenntnis."},
+  {t:2,type:'mc',q:"Was ist die Mesusa?",o:["Ein Gebetstuch","Eine kleine Kapsel mit Toratext, am Türrahmen angebracht","Der Zeigestab für die Tora","Eine Kopfbedeckung"],a:1,h:"Mesusa = Kapsel mit handgeschriebenem Toratext. Sie wird am Türpfosten befestigt und schützt das Haus."},
+  {t:2,type:'mc',q:"Wozu dienen die Tefillin?",o:["Als Kopfbedeckung beim Gebet","Als Gebetsbuch","Kleine Lederkapseln mit Toratexten, am Arm und Kopf befestigt","Als Kerzenständer"],a:2,h:"Tefillin = Lederriemen mit Kapseln, die Toratexte enthalten. Werden beim Morgengebet getragen."},
+  {t:2,type:'mc',q:"Was ist die Menora?",o:["Ein Gebetsschal","Ein fünfarmiger Kerzenständer","Ein siebenarmiger Leuchter – Symbol des jüdischen Volkes","Ein Davidstern"],a:2,h:"Menora = 7-armiger Leuchter. Stand im Tempel in Jerusalem. Steht auf dem Staatswappen Israels."},
+  {t:2,type:'tf',q:"Der Davidstern besteht aus zwei ineinander verschlungenen gleichseitigen Dreiecken.",a:true,h:"Magen David (Schild Davids) = zwei Dreiecke. Steht auf der israelischen Flagge und an Synagogen."},
+  {t:2,type:'tf',q:"Die Chamsa ist ein Fischsymbol und steht für Glück im Wasser.",a:false,h:"Chamsa = Handsymbol. Schützt vor dem «bösen Blick». Besonders beliebt bei Juden aus Nordafrika."},
+  {t:2,type:'tf',q:"Der Tallit ist ein Gebetsschal mit Fransen (Zizit), der beim Morgengebet getragen wird.",a:true,h:"Die Zizit (Fransen) erinnern an die Gebote Gottes – wie im Schma Israel erwähnt."},
+  {t:2,type:'mc',q:"Was ist die Kippa?",o:["Ein Gebetsschal","Ein Armband mit Toratext","Eine kleine runde Kopfbedeckung als Zeichen des Respekts vor Gott","Eine Schriftrolle"],a:2,h:"Kippa = kleine runde Kappe. Jüdische Männer tragen sie als Zeichen der Ehrerbietung vor Gott."},
+  {t:2,type:'mc',q:"Was ist die «Halacha»?",o:["Eine jüdische Stadt","Das jüdische Religionsgesetz – die Gesamtheit aller religiösen Regeln","Ein jüdisches Fest","Ein Teil der Bibel"],a:1,h:"Halacha = «der Weg». Das jüdische Gesetz regelt alle Lebensbereiche: Essen, Beten, Feste usw."},
+  {t:2,type:'mc',q:"Das Schma Israel stammt aus welchem Buch der Tora?",o:["1. Mose","3. Mose","5. Mose","2. Mose"],a:2,h:"Das Schma Israel steht im 5. Buch Mose (Deuteronomium), Kapitel 6, Verse 4–9."},
+  {t:2,type:'tf',q:"Nach liberaler jüdischer Tradition ist auch jüdisch, wer einen jüdischen Vater hat.",a:true,h:"Liberales/Reformjudentum: jüdisch ist, wer eine jüdische Mutter oder einen jüdischen Vater hat (oder konvertiert)."},
+  {t:2,type:'mc',q:"Was ist ein «Jad»?",o:["Ein Gebet","Ein Zeigestab aus Metall zum Lesen der Torarolle","Eine Gebetskapsel","Ein Musikinstrument"],a:1,h:"Jad = «Hand» (hebr.). Der Zeiger schützt das Pergament – man berührt die Torarolle nicht mit dem Finger."},
+  {t:2,type:'tf',q:"Die Schma Israel wird von Juden täglich gesprochen – morgens und abends.",a:true,h:"Das Schma Israel ist das erste Gebet, das jüdische Kinder lernen, und wird zweimal täglich gesprochen."},
+
+  // ══ THEMA 3: Tanach & Talmud ══
+  {t:3,type:'mc',q:"Was bedeutet das Akronym «TeNaK»?",o:["Tempel, Nacht, Kodex","Tora, Nevi'im, Ketuvim","Text, Namen, Konsonanten","Traditionen, Normen, Kenntnisse"],a:1,h:"T = Tora, N = Nevi'im (Propheten), K = Ketuvim (Schriften). Das sind die drei Teile des Tanach."},
+  {t:3,type:'mc',q:"Wie viele Bücher enthält der Tanach?",o:["24","39","66","5"],a:1,h:"Der Tanach enthält 39 Bücher (nach christlicher Zählung) / 24 Bücher (nach jüdischer Zählung)."},
+  {t:3,type:'mc',q:"Was ist die Tora?",o:["Die erste von drei Schriften im Tanach – die 5 Bücher Mose","Die Kommentare der Rabbiner","Das Gebetbuch","Die Geschichte der Propheten"],a:0,h:"Tora = «Weisung/Gesetz». Die 5 Bücher Mose sind der wichtigste Teil des Tanach."},
+  {t:3,type:'mc',q:"Was bedeutet «Nevi'im»?",o:["Schriften","Gesetze","Propheten","Geschichten"],a:2,h:"Nevi'im = Propheten (hebr.). Dieser Teil enthält die Bücher der 15 Propheten, darunter Jesaja, Jeremia, Ezechiel."},
+  {t:3,type:'mc',q:"Was beinhalten die «Ketuvim»?",o:["Nur die Zehn Gebote","Bücher wie Psalmen, Hiob und Sprüche – Weisheitsliteratur und Poesie","Nur die Propheten","Die Geschichte von Moses"],a:1,h:"Ketuvim = «die Geschriebenen/Schriften». Enthält Psalmen, Hiob, Sprüche, Ruth, Esra u.a."},
+  {t:3,type:'mc',q:"Was ist der Talmud?",o:["Eine neuere Version der Bibel","Die mündliche Lehre des Judentums – erklärt, wie Toragebote im Alltag angewendet werden","Ein Gebetbuch","Ein Fest-Kalender"],a:1,h:"Talmud = «Belehrung/Studium» (hebr.). Er diskutiert die praktische Anwendung der Tora."},
+  {t:3,type:'mc',q:"Aus welchen zwei Teilen besteht der Talmud?",o:["Tora und Nevi'im","Genesis und Exodus","Mischna und Gemara","Psalmen und Sprüche"],a:2,h:"Mischna = Wiederholung der Tora (Regeln). Gemara = Kommentare und Auslegungen der Mischna."},
+  {t:3,type:'tf',q:"Der Talmud wird in der Synagoge wie die Tora vorgelesen.",a:false,h:"Die Tora wird vorgelesen; der Talmud wird studiert und diskutiert – z.B. in Talmudschulen (Jeschiwot)."},
+  {t:3,type:'tf',q:"Der Tanach ist weitgehend identisch mit dem «Alten Testament» der Christen.",a:true,h:"Inhaltlich sind Tanach und Altes Testament sehr ähnlich – sie unterscheiden sich hauptsächlich in Aufbau und Reihenfolge."},
+  {t:3,type:'tf',q:"Die Tora wurde über ca. 900 Jahre von verschiedenen Autoren geschrieben.",a:true,h:"Der Tanach wurde über viele Jahrhunderte verfasst und ca. 100 n.Chr. endgültig als Kanon festgelegt."},
+  {t:3,type:'mc',q:"Was ist die «Mischna»?",o:["Ein Teil des Talmud mit Regeln und Gesetzen","Ein Fest-Kalender","Der erste Teil der Tora","Ein jüdisches Lied"],a:0,h:"Mischna = «Wiederholung» (der Tora). Sie enthält religiöse, ethnische und rechtliche Regeln."},
+  {t:3,type:'mc',q:"Wer benutzt den Talmud hauptsächlich?",o:["Alle Juden täglich","Rabbiner – als wichtigste Quelle für religiöse Entscheidungen","Nur Frauen","Nur Kinder"],a:1,h:"Rabbiner = jüdische Gelehrte und Leiter von Gemeinden. Sie stützen sich auf den Talmud für Urteile."},
+
+  // ══ THEMA 4: Religiöse Praxis ══
+  {t:4,type:'mc',q:"Wann beginnt der Sabbat?",o:["Samstagmorgen bei Sonnenaufgang","Freitagabend bei Sonnenuntergang","Donnerstagabend","Freitagmittag um 12 Uhr"],a:1,h:"Der Sabbat beginnt mit dem Sonnenuntergang am Freitag und endet am Samstagabend."},
+  {t:4,type:'mc',q:"Warum gibt es den Sabbat?",o:["Als Erinnerung an Moses","Als Erinnerung an den 7. Schöpfungstag, an dem Gott ruhte","Als Vorbereitung auf Pessach","Als Dankgebet für die Ernte"],a:1,h:"Gott ruhte am 7. Tag der Schöpfung (1. Mose 2,2–3). Der Sabbat ist heilig und darf nicht gearbeitet werden."},
+  {t:4,type:'tf',q:"Am Sabbat ist Autofahren verboten.",a:true,h:"Autofahren gilt als Arbeit (Verbrennung = Feuer machen). Auch Elektrizität benutzen, schreiben, kochen sind verboten."},
+  {t:4,type:'tf',q:"Am Sabbat ist Beten verboten, da der Tag nur der Ruhe dienen soll.",a:false,h:"Beten ist am Sabbat ausdrücklich erlaubt und sogar erwünscht. Viele besuchen die Synagoge."},
+  {t:4,type:'mc',q:"Was ist die Bar Mitzwa?",o:["Ein jüdisches Erntedankfest","Ein religiöser Übergangsritus für Jungen mit 13 Jahren","Ein Sabbat-Ritual","Ein Gebet aus der Tora"],a:1,h:"Bar Mitzwa = «Sohn des Gebots». Ab 13 ist ein Junge selbst für die Erfüllung religiöser Gebote verantwortlich."},
+  {t:4,type:'mc',q:"Was bedeutet «koscher»?",o:["Sehr teuer","Nach jüdischen Speisegesetzen erlaubt","Scharf gewürzt","Heilig"],a:1,h:"Koscher (kascher) = «geeignet/rechtmässig». Bezeichnet Lebensmittel, die nach der Kaschrut erlaubt sind."},
+  {t:4,type:'tf',q:"Fleisch und Milchprodukte dürfen bei einer koscheren Mahlzeit nicht zusammen gegessen werden.",a:true,h:"Die Trennung von Fleisch und Milch ist eine der wichtigsten Kaschrut-Regeln. Getrennte Töpfe, Teller, Wartezeit."},
+  {t:4,type:'mc',q:"Was ist die Klagemauer?",o:["Die Westmauer des zerstörten zweiten Tempels – heiligster Ort des Judentums","Eine Mauer in Babylonien","Der Eingang zur Synagoge","Eine Gedenkstätte für den Holocaust"],a:0,h:"Die Klagemauer (Kotel) ist der einzige erhaltene Teil des zweiten Tempels in Jerusalem."},
+  {t:4,type:'mc',q:"Was ist Chanukka?",o:["Ein Fastentag","Ein achttägiges Lichterfest – Wiedereinweihung des Tempels","Das jüdische Neujahrsfest","Ein Erntefest"],a:1,h:"Chanukka = «Einweihung». 8 Tage, täglich eine Kerze am Chanukkia anzünden. Feier des Siegs der Makkabäer."},
+  {t:4,type:'mc',q:"Was ist Sukkot?",o:["Ein Lichterfest","Ein Fastentag","Ein Erntedankfest mit Erinnerung an die Wüstenwanderung – man lebt in Laubhütten","Ein Taufrituals"],a:2,h:"Sukkot = «Hütten». 7 Tage in einer Sukka (Laubhütte) essen und ggf. schlafen. Erntedank + Wüstenerinnerung."},
+  {t:4,type:'tf',q:"In orthodoxen Synagogen beten Männer und Frauen getrennt.",a:true,h:"Eine Mechiza (Trennwand) trennt den Männer- vom Frauenbereich. Im liberalen Judentum beten alle zusammen."},
+  {t:4,type:'mc',q:"Was ist der «Ner Tamid» in der Synagoge?",o:["Der Toraschrein","Das Lesepult","Die ewige Lampe vor dem Toraschrein – brennt immer als Symbol für Gottes Gegenwart","Die Abschlusskerze"],a:2,h:"Ner Tamid = «ewiges Licht». Hängt vor dem Toraschrein und darf niemals erlöschen."},
+  {t:4,type:'mc',q:"Was ist die «Bima» in der Synagoge?",o:["Der Toraschrein","Das erhöhte Lesepult, von dem die Tora vorgelesen wird","Die Trennung zwischen Männern und Frauen","Die Menora"],a:1,h:"Bima = erhöhtes Pult. Von dort liest der Vorbeter oder Bar-Mitzwa-Jugendliche aus der Tora."},
+  {t:4,type:'mc',q:"Was ist Purim?",o:["Ein Fastentag","Ein fröhliches Fest zur Erinnerung an die Errettung der Juden in Persien (Geschichte Esthers)","Das Pessach-Vorbereitungsfest","Ein Erntedankfest"],a:1,h:"Purim = fröhlich feiern, Kostüme, Lärm (bei Hamanns Namen). Feiert die Errettung durch Königin Esther."},
+  {t:4,type:'tf',q:"Die Bar Mitzwa findet für Mädchen im liberalen Judentum mit 12 Jahren statt.",a:false,h:"Im liberalen Judentum feiern Mädchen die Bat Mitzwa – je nach Gemeinde mit 12 oder 13 Jahren."},
+  {t:4,type:'mc',q:"Was ist Schawuot?",o:["Das Lichterfest","Das Fest der Offenbarung der Tora am Berg Sinai – auch Erntedankfest","Der Beginn des Sabbats","Ein Fasttag"],a:1,h:"Schawuot = «Wochen». Kommt 7 Wochen nach Pessach. Feiert die Übergabe der Tora an Moses."},
+  {t:4,type:'mc',q:"Was bedeutet «Bat Mitzwa»?",o:["Tochter Israels","Tochter des Gebots – religiöse Mündigkeit für Mädchen","Mutter des Volkes","Schwester der Gemeinde"],a:1,h:"Bat = Tochter, Mitzwa = Gebot. Wie Bar Mitzwa (Jungen), aber für Mädchen – je nach Tradition mit 12 oder 13 Jahren."},
+];
+
+// ── MATCH QUESTIONS (special format) ────────────────────────────────────────
+const MATCH_BANK = [
+  { t:2, type:'match', q:"Ordne die Symbole ihren Beschreibungen zu:",
+    pairs:[
+      ["Mesusa","Kapsel mit Toratext am Türrahmen"],
+      ["Menora","Siebenarmiger Leuchter – Staatswappen Israels"],
+      ["Davidstern","Zwei verschlungene Dreiecke – Verbindung Gott/Mensch"],
+      ["Tallit","Gebetsschal mit Fransen (Zizit)"],
+      ["Tefillin","Lederkapsel mit Toratext – am Arm und Kopf"],
+    ],
+    h:"Diese Symbole gehören zur täglichen Praxis und zum Glaubensleben der Juden."
+  },
+  { t:1, type:'match', q:"Ordne die Elemente des Sedertellers ihrer Bedeutung zu:",
+    pairs:[
+      ["Mazzen","Auszug – keine Zeit den Teig zu säuern"],
+      ["Bitterkraut","Bittere Zeit der Sklaverei"],
+      ["Charoset","Lehmziegel der Sklaven"],
+      ["Salzwasser","Vergossene Tränen der Sklaven"],
+      ["Knochen","Lamm; Blut an Türpfosten schützte Söhne"],
+    ],
+    h:"Jedes Element auf dem Sederteller erinnert an einen Aspekt des Auszugs aus Ägypten."
+  },
+  { t:3, type:'match', q:"Ordne die Buchstaben von TeNaK dem richtigen Inhalt zu:",
+    pairs:[
+      ["T – Tora","5 Bücher Mose; Herzstück des Judentums"],
+      ["N – Nevi'im","Bücher der 15 Propheten (Jesaja, Jeremia...)"],
+      ["K – Ketuvim","Psalmen, Hiob, Sprüche, Ruth u.a."],
+      ["Mischna","Wiederholung der Tora – Teil des Talmud"],
+      ["Gemara","Kommentare zur Mischna – Teil des Talmud"],
+    ],
+    h:"T=Tora, N=Nevi'im (Propheten), K=Ketuvim (Schriften). Plus die zwei Talmud-Teile."
+  },
+  { t:4, type:'match', q:"Ordne die jüdischen Feste ihrer Beschreibung zu:",
+    pairs:[
+      ["Pessach","Befreiung aus Ägypten – Sederabend, Mazzen"],
+      ["Chanukka","Lichterfest – 8 Kerzen, Wiedereinweihung des Tempels"],
+      ["Sukkot","Erntedank – 7 Tage in der Laubhütte"],
+      ["Schawuot","Offenbarung der Tora am Berg Sinai"],
+      ["Purim","Errettung der Juden in Persien – Esthers Geschichte"],
+    ],
+    h:"Das Judentum hat einen reichen Festkalender. Jedes Fest erinnert an ein historisches Ereignis."
+  },
+];
+
+// ── STATE ──────────────────────────────────────────────────────────────────
+let selectedTopics = new Set();
+let questions = [];
+let cur = 0, correct = 0, wrong = 0, bestStreak = 0, curStreak = 0;
+let jokers = { fifty: false, tipp: false, skip: false };
+let answered = false;
+let topicStats = { 1:{c:0,t:0}, 2:{c:0,t:0}, 3:{c:0,t:0}, 4:{c:0,t:0} };
+let matchSelected = null;
+let matchAnswers = {};
+let selectedTopicsForReplay = [];
+
+function toggleTopic(t) {
+  const card = document.querySelector(`.topic-card[data-t="${t}"]`);
+  if (selectedTopics.has(t)) { selectedTopics.delete(t); card.classList.remove('selected'); }
+  else { selectedTopics.add(t); card.classList.add('selected'); }
+  document.getElementById('startSelBtn').disabled = selectedTopics.size === 0;
+}
+
+function selectAll() {
+  selectedTopicsForReplay = [1,2,3,4];
+  buildAndStart([1,2,3,4]);
+}
+
+function startSelected() {
+  if(selectedTopics.size === 0) return;
+  selectedTopicsForReplay = [...selectedTopics];
+  buildAndStart([...selectedTopics]);
+}
+
+function buildAndStart(topics) {
+  const pool = [...BANK.filter(q=>topics.includes(q.t)), ...MATCH_BANK.filter(q=>topics.includes(q.t))];
+  questions = shuffle(pool);
+  cur = 0; correct = 0; wrong = 0; bestStreak = 0; curStreak = 0;
+  jokers = { fifty:false, tipp:false, skip:false };
+  answered = false;
+  topicStats = { 1:{c:0,t:0}, 2:{c:0,t:0}, 3:{c:0,t:0}, 4:{c:0,t:0} };
+  showScreen('quizScreen');
+  document.getElementById('topProgress').style.display = 'block';
+  document.getElementById('jokerBar').style.display = 'flex';
+  renderQ();
+}
+
+function shuffle(a) { return [...a].sort(()=>Math.random()-.5); }
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function setActiveColor(t) {
+  document.documentElement.style.setProperty('--active-color', TOPIC_COLORS[t]);
+}
+
+function renderQ() {
+  answered = false;
+  matchSelected = null;
+  matchAnswers = {};
+  const q = questions[cur];
+  setActiveColor(q.t);
+
+  // progress
+  const pct = (cur/questions.length)*100;
+  document.getElementById('topFill').style.width = pct+'%';
+  document.getElementById('topLabel').textContent = `${cur+1} / ${questions.length}`;
+
+  // jokers
+  document.getElementById('jFifty').disabled = jokers.fifty;
+  document.getElementById('jTipp').disabled = jokers.tipp;
+  document.getElementById('jSkip').disabled = jokers.skip;
+
+  // badges
+  const badge = document.getElementById('qBadge');
+  badge.textContent = `Thema ${q.t}: ${TOPIC_NAMES[q.t]}`;
+  badge.style.background = TOPIC_COLORS[q.t];
+
+  const typeBadge = document.getElementById('qTypeBadge');
+  typeBadge.textContent = q.type === 'mc' ? 'Multiple Choice' : q.type === 'tf' ? 'Richtig / Falsch' : 'Zuordnung';
+
+  document.getElementById('qNum').textContent = `Frage ${cur+1} von ${questions.length}`;
+  document.getElementById('qText').textContent = q.q;
+
+  const body = document.getElementById('qBody');
+  const fb = document.getElementById('qFeedback');
+  fb.style.display = 'none'; fb.className = 'feedback';
+  document.getElementById('nextBtn').style.display = 'none';
+  body.innerHTML = '';
+
+  if (q.type === 'mc') renderMC(q, body);
+  else if (q.type === 'tf') renderTF(q, body);
+  else if (q.type === 'match') renderMatch(q, body);
+}
+
+function renderMC(q, body) {
+  const opts = document.createElement('div'); opts.className = 'opts';
+  const letters = ['A','B','C','D'];
+  q.o.forEach((o,i) => {
+    const btn = document.createElement('button');
+    btn.className = 'opt-btn';
+    btn.innerHTML = `<span class="opt-letter">${letters[i]}</span><span>${o}</span>`;
+    btn.dataset.i = i;
+    btn.onclick = () => pickMC(i, q);
+    opts.appendChild(btn);
+  });
+  body.appendChild(opts);
+}
+
+function pickMC(idx, q) {
+  if(answered) return; answered = true;
+  const btns = document.querySelectorAll('.opt-btn');
+  btns.forEach(b=>b.disabled=true);
+  const ok = idx === q.a;
+  btns[idx].classList.add(ok?'correct':'wrong');
+  if(!ok) btns[q.a].classList.add('reveal');
+  recordAnswer(ok, q);
+  showFeedback(ok, q.h);
+}
+
+function renderTF(q, body) {
+  const wrap = document.createElement('div'); wrap.className = 'tf-opts';
+  ['Richtig','Falsch'].forEach((label,i) => {
+    const btn = document.createElement('button');
+    btn.className = 'tf-btn ' + label.toLowerCase();
+    btn.textContent = label;
+    btn.onclick = () => pickTF(i===0, q, wrap);
+    wrap.appendChild(btn);
+  });
+  body.appendChild(wrap);
+}
+
+function pickTF(userTrue, q, wrap) {
+  if(answered) return; answered = true;
+  const btns = wrap.querySelectorAll('.tf-btn');
+  btns.forEach(b=>b.disabled=true);
+  const ok = userTrue === q.a;
+  btns[0].classList.add(q.a===true?(ok?'correct':''):'reveal');
+  btns[1].classList.add(q.a===false?(ok?'correct':''):'reveal');
+  if(!ok) btns[userTrue?0:1].classList.add('wrong');
+  recordAnswer(ok, q);
+  showFeedback(ok, q.h);
+}
+
+function renderMatch(q, body) {
+  const shuffledDefs = shuffle(q.pairs.map(p=>p[1]));
+
+  body.innerHTML = `<p class="match-instr">Klicke zuerst auf einen Begriff links, dann auf die passende Beschreibung rechts.</p>`;
+  const wrap = document.createElement('div'); wrap.className = 'match-wrap';
+
+  // LEFT
+  const leftCol = document.createElement('div');
+  leftCol.innerHTML = '<div class="match-col-title">Begriff</div>';
+  const leftList = document.createElement('div'); leftList.className = 'match-left';
+  q.pairs.forEach((p,i) => {
+    const item = document.createElement('div');
+    item.className = 'match-item';
+    item.dataset.i = i;
+    item.innerHTML = `<span class="match-num">${i+1}</span><span>${p[0]}</span>`;
+    item.onclick = () => selectLeft(i, item);
+    leftList.appendChild(item);
+  });
+  leftCol.appendChild(leftList);
+
+  // RIGHT
+  const rightCol = document.createElement('div');
+  rightCol.innerHTML = '<div class="match-col-title">Beschreibung</div>';
+  const rightList = document.createElement('div'); rightList.className = 'match-right';
+  shuffledDefs.forEach((def,i) => {
+    const opt = document.createElement('button');
+    opt.className = 'match-opt';
+    opt.dataset.def = def;
+    opt.innerHTML = `<span class="match-letter">${String.fromCharCode(65+i)}</span><span>${def}</span>`;
+    opt.onclick = () => selectRight(def, opt, q, leftList, rightList);
+    rightList.appendChild(opt);
+  });
+  rightCol.appendChild(rightList);
+
+  wrap.appendChild(leftCol);
+  wrap.appendChild(rightCol);
+  body.appendChild(wrap);
+
+  // submit btn
+  const sub = document.createElement('button');
+  sub.className = 'next-btn'; sub.id = 'matchSubmit';
+  sub.style.cssText = 'display:none;margin-top:1rem;background:var(--active-color)';
+  sub.textContent = 'Auflösung anzeigen';
+  sub.onclick = () => submitMatch(q, leftList, rightList);
+  body.appendChild(sub);
+}
+
+let matchLeftSelected = null;
+let matchPairs = {};
+
+function selectLeft(i, item) {
+  if(answered) return;
+  document.querySelectorAll('.match-item').forEach(el=>el.style.background='');
+  matchLeftSelected = i;
+  item.style.background = 'color-mix(in srgb, var(--active-color) 12%, white)';
+  item.style.borderColor = 'var(--active-color)';
+}
+
+function selectRight(def, opt, q, leftList, rightList) {
+  if(answered || matchLeftSelected === null) return;
+  // record pair
+  matchPairs[matchLeftSelected] = def;
+  // visual
+  document.querySelectorAll('.match-item').forEach(el=>{el.style.background='';el.style.borderColor='';});
+  document.querySelectorAll('.match-opt').forEach(el=>el.classList.remove('selected'));
+  // mark matched items
+  Object.keys(matchPairs).forEach(k => {
+    const leftItem = leftList.children[k];
+    leftItem.style.background = 'color-mix(in srgb, var(--active-color) 10%, white)';
+    leftItem.style.borderColor = 'var(--active-color)';
+    // find right opt
+    rightList.querySelectorAll('.match-opt').forEach(el => {
+      if(el.dataset.def === matchPairs[k]) el.classList.add('selected');
+    });
+  });
+  matchLeftSelected = null;
+  if(Object.keys(matchPairs).length === q.pairs.length) {
+    document.getElementById('matchSubmit').style.display = 'block';
+  }
+}
+
+function submitMatch(q, leftList, rightList) {
+  answered = true;
+  document.getElementById('matchSubmit').style.display = 'none';
+  let allOk = true;
+  q.pairs.forEach((p,i) => {
+    const correct = matchPairs[i] === p[1];
+    if(!correct) allOk = false;
+    const leftItem = leftList.children[i];
+    leftItem.style.background = correct ? '#D4EDD4' : '#F5D5D5';
+    leftItem.style.borderColor = correct ? '#2D6A2D' : '#7B2020';
+    rightList.querySelectorAll('.match-opt').forEach(el => {
+      if(el.dataset.def === p[1]) {
+        el.classList.remove('selected');
+        el.classList.add(correct && matchPairs[i]===p[1] ? 'correct' : 'correct');
+        el.disabled = true;
+      }
+      if(el.dataset.def === matchPairs[i] && !correct) {
+        el.classList.remove('selected'); el.classList.add('wrong'); el.disabled=true;
+      }
+    });
+  });
+  rightList.querySelectorAll('.match-opt').forEach(el=>el.disabled=true);
+  leftList.querySelectorAll('.match-item').forEach(el=>el.onclick=null);
+  recordAnswer(allOk, q);
+  showFeedback(allOk, q.h);
+}
+
+function recordAnswer(ok, q) {
+  topicStats[q.t].t++;
+  if(ok) { correct++; curStreak++; if(curStreak>bestStreak)bestStreak=curStreak; topicStats[q.t].c++; }
+  else { wrong++; curStreak=0; }
+}
+
+function showFeedback(ok, hint) {
+  const fb = document.getElementById('qFeedback');
+  fb.style.display = 'block';
+  fb.className = 'feedback ' + (ok?'ok':'ko');
+  fb.textContent = (ok?'✓ Richtig! ':'✗ Leider falsch. ') + hint;
+  document.getElementById('nextBtn').style.display = 'block';
+}
+
+function nextQ() {
+  cur++;
+  if(cur >= questions.length) showResult();
+  else renderQ();
+}
+
+function useJoker(type) {
+  if(jokers[type] || answered) return;
+  jokers[type] = true;
+  document.getElementById('j'+type.charAt(0).toUpperCase()+type.slice(1)).disabled = true;
+  const q = questions[cur];
+  if(type==='fifty' && q.type==='mc') {
+    const btns = document.querySelectorAll('.opt-btn');
+    const wrongs = shuffle([0,1,2,3].filter(i=>i!==q.a)).slice(0,2);
+    wrongs.forEach(i=>{btns[i].style.opacity='0.18';btns[i].disabled=true;});
+  } else if(type==='tipp') {
+    const fb = document.getElementById('qFeedback');
+    fb.style.display='block'; fb.className='feedback ok';
+    fb.textContent = '💡 Tipp: ' + q.h;
+  } else if(type==='skip') {
+    cur++;
+    if(cur>=questions.length){showResult();return;}
+    renderQ();
+  }
+}
+
+function showResult() {
+  showScreen('resultScreen');
+  document.getElementById('topProgress').style.display='none';
+  document.getElementById('jokerBar').style.display='none';
+  const tot = correct+wrong;
+  const pct = tot>0 ? Math.round(correct/tot*100) : 0;
+  const emojis = pct>=90?'🏆':pct>=75?'⭐':pct>=50?'👍':'💪';
+  const labels = pct>=90?'Ausgezeichnet – bereit für die Prüfung!':pct>=75?'Sehr gut! Noch ein bisschen üben.':pct>=50?'Gut begonnen – schau die Zusammenfassung nochmal an.':'Weiter üben – du schaffst das!';
+  document.getElementById('rEmoji').textContent = emojis;
+  document.getElementById('rPct').textContent = pct+'%';
+  document.getElementById('rPct').style.color = pct>=75?'#2D6A2D':pct>=50?'#3E1F7A':'#7B2020';
+  document.getElementById('rLabel').textContent = labels;
+  document.getElementById('rRight').textContent = correct;
+  document.getElementById('rWrong').textContent = wrong;
+  document.getElementById('rStreak').textContent = bestStreak;
+
+  // topic scores
+  const ts = document.getElementById('topicScores');
+  let html = '<div class="ts-title">Ergebnis pro Thema</div>';
+  [1,2,3,4].forEach(t=>{
+    const s=topicStats[t];
+    if(s.t===0) return;
+    const p=Math.round(s.c/s.t*100);
+    html+=`<div class="ts-row">
+      <div class="ts-name" style="font-size:0.82rem;">Thema ${t}</div>
+      <div class="ts-bar-wrap"><div class="ts-bar" style="width:${p}%;background:${TOPIC_COLORS[t]}"></div></div>
+      <div class="ts-pct" style="color:${TOPIC_COLORS[t]}">${p}%</div>
+    </div>`;
+  });
+  ts.innerHTML = html;
+}
+
+function replay() {
+  buildAndStart(selectedTopicsForReplay);
+}
+
+function goHome() {
+  showScreen('homeScreen');
+  document.getElementById('topProgress').style.display='none';
+  document.getElementById('jokerBar').style.display='none';
+}
+</script>
+</body>
+</html>
